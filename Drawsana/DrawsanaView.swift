@@ -432,6 +432,11 @@ extension DrawsanaView: DrawingDelegate {
       applySelectionViewState()
     }
   }
+  func drawingDidRemoveAllShapes() {
+    redrawAbsolutelyEverything()
+    toolSettings.selectedShape = nil
+    applySelectionViewState()
+  }
 }
 
 extension DrawsanaView: ToolSettingsDelegate {

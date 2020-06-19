@@ -144,6 +144,11 @@ public class Drawing: Codable {
     shapes = shapes.filter({ $0 !== shape })
     delegate?.drawingDidRemoveShape(shape)
   }
+    
+  public func removeAll() {
+      shapes = []
+      delegate?.drawingDidRemoveAllShapes()
+  }
 
   public func getShape(at point: CGPoint, filter: ((Shape) -> Bool)? = nil) -> Shape? {
     return shapes.filter({ $0.hitTest(point: point) && filter?($0) != false }).first
@@ -161,6 +166,7 @@ protocol DrawingDelegate: AnyObject {
   func drawingDidAddShape(_ shape: Shape)
   func drawingDidUpdateShape(_ shape: Shape)
   func drawingDidRemoveShape(_ shape: Shape)
+  func drawingDidRemoveAllShapes()
 }
 
 public enum DrawsanaDecodingError: Error {
