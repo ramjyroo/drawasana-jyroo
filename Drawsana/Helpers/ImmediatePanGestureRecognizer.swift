@@ -37,7 +37,7 @@ class ImmediatePanGestureRecognizer: UIGestureRecognizer {
   private var lastPoint: CGPoint = .zero
   private var lastTime: CFTimeInterval = 0
   private var trackedTouch: UITouch?
-
+  private var didIgnoreToucheEnded: Bool = false
   var velocity: CGPoint? {
     guard let view = view, let trackedTouch = trackedTouch else { return nil }
     let delta = trackedTouch.location(in: view) - lastLastPoint
@@ -53,26 +53,51 @@ class ImmediatePanGestureRecognizer: UIGestureRecognizer {
   }
 
   override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-    guard trackedTouch == nil, let firstTouch = touches.first, let view = view else { return }
+    guard let view = view else {
+        print("touchesBegan - Skip processing as view is nil")
+        return
+    }
+    guard let firstTouch = touches.first else {
+        print("touchesBegan - Skip processing as touches is empty - not able to get first touch")
+        return
+    }
+    if let existingTrackedTouch = trackedTouch {
+        if didIgnoreToucheEnded {
+            print("touchesBegan - Skip processing as trackedTouch is already set - phase: \(existingTrackedTouch.phase), count: \(existingTrackedTouch.tapCount) didIgnoreToucheEnded was set")
+            didIgnoreToucheEnded = false
+            self.trackedTouch = nil
+        } else {
+            print("touchesBegan - Skip processing as trackedTouch is already set - phase: \(existingTrackedTouch.phase), count: \(existingTrackedTouch.tapCount) didIgnoreToucheEnded was not set")
+            return
+        }
+    }
     trackedTouch = firstTouch
     startPoint = firstTouch.location(in: view)
     lastPoint = startPoint
     lastTime = CFAbsoluteTimeGetCurrent()
     lastLastPoint = startPoint
     lastLastTime = lastTime
+    print("touchesBegan - Updating state from: \(state) to began - set tracked touch - phase: \(firstTouch.phase.rawValue), count: \(firstTouch.tapCount)")
     state = .began
   }
 
   override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
-    guard
-      state == .began || state == .changed,
-      let view = view,
-      let trackedTouch = trackedTouch,
-      touches.contains(trackedTouch) else
-    {
-      return
+    guard let view = view else {
+        print("touchesMoved -  Skip processing as view is nil")
+        return
     }
-
+    guard state == .began || state == .changed else {
+        print("touchesMoved -  Skip processing as state: \(state) is not in began or changed state")
+        return
+    }
+    guard let trackedTouch = trackedTouch else {
+        print("touchesMoved -  Skip processing as trackedTouch is not set")
+        return
+    }
+    guard touches.contains(trackedTouch) else {
+        print("touchesMoved - Skip processing as trackedTouch is not in touches set")
+        return
+    }
     lastLastTime = lastTime
     lastLastPoint = lastPoint
     lastTime = CFAbsoluteTimeGetCurrent()
@@ -80,19 +105,25 @@ class ImmediatePanGestureRecognizer: UIGestureRecognizer {
     if (lastPoint - startPoint).length >= tapThreshold {
       hasExceededTapThreshold = true
     }
-
+    print("touchesMoved - Updating state from: \(state) to changed")
     state = .changed
   }
 
   override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
-    guard
-      state == .began || state == .changed,
-      let trackedTouch = trackedTouch,
-      touches.contains(trackedTouch) else
-    {
-      return
+    guard state == .began || state == .changed else {
+        print("touchesEnded -  Skip processing as state: \(state) is not in began or changed state")
+        return
     }
-
+    guard let trackedTouch = trackedTouch else {
+        print("touchesEnded -  Skip processing as trackedTouch is not set")
+        return
+    }
+    guard touches.contains(trackedTouch) else {
+        print("touchesEnded - Skip processing as trackedTouch is not in touches set")
+        didIgnoreToucheEnded = true
+        return
+    }
+    print("touchesEnded - Updating state from: \(state) to ended")
     state = .ended
 
     DispatchQueue.main.async {
