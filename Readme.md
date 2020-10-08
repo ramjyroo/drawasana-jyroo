@@ -1,4 +1,4 @@
-#  Drawsana 0.11.0
+#  Drawsana 0.12.0
 
 Drawsana is a generalized framework for making freehand drawing views on iOS. You can
 let users scribble over images, add shapes and text, and even make your own tools.
@@ -9,6 +9,8 @@ Drawsana might work for you!
 [Demo source code](https://github.com/Asana/Drawsana/blob/master/Drawsana%20Demo/ViewController.swift)
 
 [Docs](https://asana.github.io/Drawsana)
+
+[Blog post: Let your users mark up images on iOS with Drawsana](https://blog.asana.com/2018/10/mark-up-images-ios-drawsana/)
 
 _Like what you see? [Come work with us!](https://asana.com/jobs/all#)_
 
@@ -32,7 +34,7 @@ Add `Asana/Drawsana` to your Cartfile and update your project like you would for
 Carthage framework, or clone the source code and add the project to your workspace.
 
 ```
-github "Asana/Drawsana" == 0.11.0
+github "Asana/Drawsana" == 0.12.0
 ```
 
 ## Usage
@@ -94,6 +96,17 @@ open https://asana.github.io/Drawsana
 ```
 
 ## Changelog
+
+### 0.12.0
+* Undo operations are now accessible outside the framework to enable you to make undoable changes with your own UI.
+  - `AddShapeOperation`
+  - `RemoveShapeOperation`
+  - `ChangeTransformOperation`
+  - `EditTextOperation`
+  - `ChangeExplicitWidthOperation`
+* Fix drawing view not being redrawn after being resized.
+* Fix bugs related to color serialization.
+* Fix bugs related to text entry.
 
 ### 0.11.0
 
